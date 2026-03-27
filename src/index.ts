@@ -79,6 +79,28 @@ class UsersData {
       Message.showColorized(MessageVariant.Error, 'User not found...');
     }
   }
+
+  public edit(currentName: string, newData: User): void {
+    const user = this.data.find((u) => u.name === currentName);
+
+    if (user) {
+      if (newData.name.length > 0 && newData.age > 0) {
+        user.name = newData.name;
+        user.age = newData.age;
+        Message.showColorized(
+          MessageVariant.Success,
+          `User updated! Now: ${user.name}, ${user.age}`,
+        );
+      } else {
+        Message.showColorized(MessageVariant.Error, 'Wrong new data');
+      }
+    } else {
+      Message.showColorized(
+        MessageVariant.Error,
+        'User not found for editing...',
+      );
+    }
+  }
 }
 
 const users = new UsersData();
@@ -98,6 +120,7 @@ enum Action {
   Add = 'add',
   Remove = 'remove',
   Quit = 'quit',
+  Edit = 'edit',
 }
 
 type InquirerAnswers = {
@@ -143,9 +166,30 @@ const startApp = () => {
           ]);
           users.remove(name.name);
           break;
+        case Action.Edit:
+          const toEdit = await inquirer.prompt([
+            {
+              name: 'currentName',
+              type: 'input',
+              message: 'Which user do you want to edit (enter current name)?',
+            },
+            { name: 'name', type: 'input', message: 'Enter NEW name' },
+            {
+              name: 'age',
+              type: 'number',
+              message: 'Enter NEW age',
+            },
+          ]);
+          users.edit(toEdit.currentName, {
+            name: toEdit.name,
+            age: toEdit.age,
+          });
+          break;
         case Action.Quit:
           Message.showColorized(MessageVariant.Info, 'Bye bye!');
           return;
+        default:
+          Message.showColorized(MessageVariant.Error, 'Command not found...');
       }
       startApp();
     });
