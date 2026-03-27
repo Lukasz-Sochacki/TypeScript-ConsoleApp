@@ -1,5 +1,5 @@
 const inquirer = require('inquirer');
-import consola from 'consola';
+const consola = require('consola');
 
 enum MessageVariant {
   Success = 'success',
@@ -38,18 +38,6 @@ class Message {
     }
   }
 }
-
-// const msg = new Message('heLlo world!');
-// msg.show(); // "heLlo world!"
-// msg.capitalize();
-// msg.show(); // "Hello world!"
-// msg.toLowerCase();
-// msg.show(); // "hello world!"
-// msg.toUpperCase();
-// msg.show(); // "HELLO WORLD!"
-// Message.showColorized(MessageVariant.Success, 'Test'); // √ "Test"
-// Message.showColorized(MessageVariant.Error, 'Test 2'); // "x Test 2"
-// Message.showColorized(MessageVariant.Info, 'Test 3'); // ℹ "Test 3"
 
 interface User {
   name: string;
@@ -93,16 +81,17 @@ class UsersData {
   }
 }
 
-// const users = new UsersData();
-// users.showAll();
-// users.add({ name: 'Jan', age: 20 });
-// users.add({ name: 'Adam', age: 30 });
-// users.add({ name: 'Kasia', age: 23 });
-// users.add({ name: 'Basia', age: -6 });
-// users.showAll();
-// users.remove('Maurycy');
-// users.remove('Adam');
-// users.showAll();
+const users = new UsersData();
+console.log('\n');
+console.log('???? Welcome to the UsersApp!');
+console.log('====================================');
+Message.showColorized(MessageVariant.Info, 'Available actions');
+console.log('\n');
+console.log('list – show all users');
+console.log('add – add new user to the list');
+console.log('remove – remove user from the list');
+console.log('quit – quit the app');
+console.log('\n');
 
 enum Action {
   List = 'list',
@@ -125,10 +114,38 @@ const startApp = () => {
       },
     ])
     .then(async (answers: InquirerAnswers) => {
-      console.log('Chosen action: ' + answers.action);
-      if (answers.action === Action.Quit) {
-        console.log('Goodbye!');
-        return;
+      switch (answers.action) {
+        case Action.List:
+          users.showAll();
+          break;
+        case Action.Add:
+          const user = await inquirer.prompt([
+            {
+              name: 'name',
+              type: 'input',
+              message: 'Enter name',
+            },
+            {
+              name: 'age',
+              type: 'number',
+              message: 'Enter age',
+            },
+          ]);
+          users.add(user);
+          break;
+        case Action.Remove:
+          const name = await inquirer.prompt([
+            {
+              name: 'name',
+              type: 'input',
+              message: 'Enter name',
+            },
+          ]);
+          users.remove(name.name);
+          break;
+        case Action.Quit:
+          Message.showColorized(MessageVariant.Info, 'Bye bye!');
+          return;
       }
       startApp();
     });
