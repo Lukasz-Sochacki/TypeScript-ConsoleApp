@@ -7,6 +7,19 @@ enum MessageVariant {
   Info = 'info',
 }
 
+function measurePerformance(target: any, name: string, descriptor: any) {
+  const originalMethod = descriptor.value;
+  descriptor.value = function (...args: any[]) {
+    const start = performance.now();
+    const result = originalMethod.apply(this, args);
+    const finish = performance.now();
+    console.info(
+      `\n [PERF] ${name} execution time: ${(finish - start).toFixed(4)} ms`,
+    );
+    return result;
+  };
+}
+
 class Message {
   constructor(private content: string) {}
 
@@ -47,6 +60,7 @@ interface User {
 class UsersData {
   public data: User[] = [];
 
+  @measurePerformance
   public showAll(): void {
     Message.showColorized(MessageVariant.Info, 'Users data');
 
@@ -56,7 +70,7 @@ class UsersData {
       console.log('No data...');
     }
   }
-
+  @measurePerformance
   public add(user: User): void {
     if (user.age > 0 && user.name.length > 0) {
       this.data.push(user);
